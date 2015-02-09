@@ -3,7 +3,7 @@
 load test_helper
 
 setup() {
-  sudo -H -u dokku /bin/bash -c "echo 'export global_test=true' > $DOKKU_ROOT/ENV"
+  sudo -H -u akretion /bin/bash -c "echo 'export global_test=true' > $DOKKU_ROOT/ENV"
   create_app
 }
 

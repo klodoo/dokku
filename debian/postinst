@@ -9,9 +9,9 @@ case "$1" in
     mandb
     [ ! -x /usr/bin/docker.io ] || ln -sf /usr/bin/docker.io /usr/local/bin/docker
     modprobe aufs || echo "WARNING: Restart server to finish installing dokku!"
-    sshcommand create dokku /usr/local/bin/dokku
+    sshcommand create akretion /usr/local/bin/dokku
     egrep -i "^docker" /etc/group || groupadd docker
-    usermod -aG docker dokku
+    usermod -aG docker akretion
     dokku plugins-install
 
     if [ -f /etc/init/dokku-installer.conf ] && service dokku-installer status 2> /dev/null | grep waiting; then

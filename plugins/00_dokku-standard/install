@@ -16,11 +16,12 @@ case "$DOKKU_DISTRO" in
     cat<<EOF > /etc/init/dokku-redeploy.conf
 description "Dokku app redeploy service"
 
-start on (started docker)
+start on (started runsvdir)
+stop on (stopped runsvdir)
 
 script
   sleep 2 # give docker some time
-  sudo -i -u dokku /usr/local/bin/dokku ps:restartall
+  sudo -i -u akretion /usr/local/bin/clodoo ps:restartall
 end script
 EOF
     ;;

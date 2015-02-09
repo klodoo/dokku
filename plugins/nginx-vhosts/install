@@ -4,11 +4,11 @@ set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 if [[ ! -f /etc/sudoers.d/dokku-nginx ]]; then
   case "$DOKKU_DISTRO" in
     ubuntu)
-      echo "%dokku ALL=(ALL) NOPASSWD:/etc/init.d/nginx reload" >> /etc/sudoers.d/dokku-nginx
+      echo "%akretion ALL=(ALL) NOPASSWD:/etc/init.d/nginx reload" >> /etc/sudoers.d/dokku-nginx
       ;;
 
     opensuse)
-      echo "%dokku ALL=(ALL) NOPASSWD:/sbin/service nginx reload" >> /etc/sudoers.d/dokku-nginx
+      echo "%akretion ALL=(ALL) NOPASSWD:/sbin/service nginx reload" >> /etc/sudoers.d/dokku-nginx
       ;;
   esac
 

@@ -7,7 +7,7 @@ dependencies:
   override:
     # need to add the dokku user to the docker group
     - sudo -E CI=true make -e sshcommand
-    - sudo usermod -G docker dokku
+    - sudo usermod -G docker akretion
     - sudo -E CI=true DOCKER_VERSION=1.4.1 make -e install: { timeout: 300 }
     - make -e ci-dependencies
     #### circle does some weird *expletive* with regards to root and gh auth (needed for gitsubmodules test)

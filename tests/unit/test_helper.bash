@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # constants
-DOKKU_ROOT=${DOKKU_ROOT:=~dokku}
+DOKKU_ROOT=${DOKKU_ROOT:=~akretion}
 TEST_APP=my-cool-guy-test-app
 
 # test functions
@@ -125,12 +125,12 @@ setup_test_tls() {
   TLS="/home/dokku/$TEST_APP/tls"
   mkdir -p $TLS
   tar xf $BATS_TEST_DIRNAME/server_ssl.tar -C $TLS
-  sudo chown -R dokku:dokku $TLS
+  sudo chown -R akretion:akretion $TLS
 }
 
 setup_test_tls_with_sans() {
   TLS="/home/dokku/$TEST_APP/tls"
   mkdir -p $TLS
   tar xf $BATS_TEST_DIRNAME/server_ssl_sans.tar -C $TLS
-  sudo chown -R dokku:dokku $TLS
+  sudo chown -R akretion:akretion $TLS
 }

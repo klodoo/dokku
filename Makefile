@@ -5,6 +5,7 @@ PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_
 STACK_URL ?= https://github.com/progrium/buildstep.git
 PREBUILT_STACK_URL ?= https://github.com/progrium/buildstep/releases/download/2014-12-16/2014-12-16_42bd9f4aab.tar.gz
 PLUGINS_PATH ?= /var/lib/dokku/plugins
+DOKKU_ROOT ?= /home/akretion
 
 # If the first argument is "vagrant-dokku"...
 ifeq (vagrant-dokku,$(firstword $(MAKECMDGOALS)))
@@ -37,7 +38,13 @@ packer:
 	packer build contrib/packer.json
 
 copyfiles:
-	cp dokku /usr/local/bin/dokku
+	find . -type f -exec sed -i 's/dokku\/$APP/clodoo\/$APP/g' {} \;
+	find . -type f -exec sed -i 's/home\/dokku/home\/akretion/g' {} \;
+	find . -type f -exec sed -i 's/acl-add dokku/acl-add akretion/g' {} \;
+	find . -type f -exec sed -i 's/acl-remove dokku/acl-remove akretion/g' {} \;
+	find . -type f -exec sed -i 's/dokku@/akretion@/g' {} \;
+	cp dokku /usr/local/bin/clodoo
+	[ -f /usr/local/bin/dokku ] || ln -s /usr/local/bin/clodoo /usr/local/bin/dokku
 	mkdir -p ${PLUGINS_PATH}
 	find ${PLUGINS_PATH} -mindepth 2 -maxdepth 2 -name '.core' -printf '%h\0' | xargs -0 rm -Rf
 	find plugins/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | while read plugin; do \
@@ -45,7 +52,7 @@ copyfiles:
 		cp -R plugins/$$plugin ${PLUGINS_PATH} && \
 		touch ${PLUGINS_PATH}/$$plugin/.core; \
 		done
-	$(MAKE) addman
+	# $(MAKE) addman
 
 addman:
 	mkdir -p /usr/local/share/man/man1
@@ -53,7 +60,7 @@ addman:
 	mandb
 
 version:
-	git describe --tags > ~dokku/VERSION  2> /dev/null || echo '~${DOKKU_VERSION} ($(shell date -uIminutes))' > ~dokku/VERSION
+	git describe --tags > ~akretion/VERSION  2> /dev/null || echo '~${DOKKU_VERSION} ($(shell date -uIminutes))' > ~akretion/VERSION
 
 plugin-dependencies: pluginhook
 	dokku plugins-install-dependencies
@@ -69,7 +76,7 @@ help2man:
 sshcommand:
 	wget -qO /usr/local/bin/sshcommand ${SSHCOMMAND_URL}
 	chmod +x /usr/local/bin/sshcommand
-	sshcommand create dokku /usr/local/bin/dokku
+	sshcommand create akretion /usr/local/bin/dokku
 
 pluginhook:
 	wget -qO /tmp/pluginhook_0.1.0_amd64.deb ${PLUGINHOOK_URL}
@@ -78,7 +85,7 @@ pluginhook:
 docker: aufs
 	apt-get install -qq -y curl
 	egrep -i "^docker" /etc/group || groupadd docker
-	usermod -aG docker dokku
+	usermod -aG docker akretion
 	curl --silent https://get.docker.io/gpg | apt-key add -
 	echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
 	apt-get update
@@ -124,8 +131,8 @@ dokku-installer:
 	test -f /var/lib/dokku/.dokku-installer-created || touch /var/lib/dokku/.dokku-installer-created
 
 vagrant-acl-add:
-	vagrant ssh -- sudo sshcommand acl-add dokku $(USER)
+	vagrant ssh -- sudo sshcommand acl-add akretion $(USER)
 
 vagrant-dokku:
-	vagrant ssh -- "sudo -H -u root bash -c 'dokku $(RUN_ARGS)'"
+	vagrant ssh -- "sudo -H -u root bash -c 'akretion $(RUN_ARGS)'"
 

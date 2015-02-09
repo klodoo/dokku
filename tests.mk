@@ -11,10 +11,10 @@ endif
 ci-dependencies: shellcheck bats
 
 setup-deploy-tests:
-	mkdir -p /home/dokku
+	mkdir -p /home/akretion
 ifdef ENABLE_DOKKU_TRACE
 	echo "-----> Enabling tracing"
-	echo "export DOKKU_TRACE=1" >> /home/dokku/dokkurc
+	echo "export DOKKU_TRACE=1" >> /home/akretion/dokkurc
 endif
 	@echo "Setting dokku.me in /etc/hosts"
 	sudo /bin/bash -c "[[ `ping -c1 dokku.me > /dev/null 2>&1; echo $$?` -eq 0 ]] || echo \"127.0.0.1  dokku.me *.dokku.me www.test.app.dokku.me\" >> /etc/hosts"
@@ -33,15 +33,15 @@ else ifeq ($(shell grep dokku.me /root/.ssh/config),)
 endif
 
 	@echo "-----> Installing SSH public key..."
-	sudo sshcommand acl-remove dokku test
-	cat /root/.ssh/dokku_test_rsa.pub | sudo sshcommand acl-add dokku test
+	sudo sshcommand acl-remove akretion test
+	cat /root/.ssh/dokku_test_rsa.pub | sudo sshcommand acl-add akretion test
 
 	@echo "-----> Intitial SSH connection to populate known_hosts..."
-	ssh -o StrictHostKeyChecking=no dokku@dokku.me help > /dev/null
+	ssh -o StrictHostKeyChecking=no akretion@dokku.me help > /dev/null
 
-ifeq ($(shell grep dokku.me /home/dokku/VHOST 2>/dev/null),)
+ifeq ($(shell grep dokku.me /home/akretion/VHOST 2>/dev/null),)
 	@echo "-----> Setting default VHOST to dokku.me..."
-	echo "dokku.me" > /home/dokku/VHOST
+	echo "dokku.me" > /home/akretion/VHOST
 endif
 
 bats:

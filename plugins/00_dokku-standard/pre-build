@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+APP="$1"; IMAGE="dokku/$APP"; CACHE_DIR="$DOKKU_ROOT/$APP/cache"
+need_db=$(docker run -v $CACHE_DIR:/cache $IMAGE /bin/bash -c "if [ -f /app/buildout.cfg ]; then echo 'true'; fi")
+
+if [ ! -z $need_db ]; then
+  if [[ ! -f "$DOKKU_ROOT/.postgresql/volume_$APP" ]]; then
+    if [[ ! -f "$DOKKU_ROOT/$APP/ENV" ]]; then
+      echo "-----> No related database server found; creating one..."
+      dokku postgresql:create $APP $APP
+    fi
+  else
+    if [[ ! -f "$DOKKU_ROOT/$APP/ENV" ]]; then
+      dokku postgresql:link $APP $APP
+    fi
+  fi
+fi
+
+cat

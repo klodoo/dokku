@@ -4,7 +4,7 @@ shopt -s nullglob
 
 export DOKKU_DISTRO=${DOKKU_DISTRO:="ubuntu"}
 export DOKKU_IMAGE=${DOKKU_IMAGE:="progrium/buildstep"}
-export DOKKU_ROOT=${DOKKU_ROOT:=~dokku}
+export DOKKU_ROOT=${DOKKU_ROOT:=~akretion}
 
 export PLUGIN_PATH=${PLUGIN_PATH:="/var/lib/dokku/plugins"}
 export DOKKU_NOT_IMPLEMENTED_EXIT=10
@@ -23,8 +23,8 @@ for arg in "$@"; do
 done
 ! has_tty && DOKKU_QUIET_OUTPUT=1
 
-if [[ $(id -un) != "dokku" && $1 != plugins-install* && $1 != "plugins-update" ]]; then
-  sudo -u dokku -E -H $0 "$@"
+if [[ $(id -un) != "akretion" && $(id -un) != "api" && $1 != plugins-install* && $1 != "plugins-update" ]]; then # AKRETION
+  sudo -u akretion -H $0 "$@"
   exit
 fi
 
@@ -84,6 +84,7 @@ case "$1" in
     # if we can't post-deploy successfully, kill new container
     kill_new() {
       docker inspect $id &> /dev/null && docker kill $id > /dev/null
+      docker logs $id # AKRETION
       trap - INT TERM EXIT
       kill -9 $$
     }
@@ -101,6 +102,7 @@ case "$1" in
     dokku_log_info1 "Running post-deploy"
     pluginhook post-deploy  $APP $port $ipaddr
     trap -        INT TERM EXIT
+    docker logs $id # AKRETION
 
     # kill the old container
     if [[ -n "$oldid" ]]; then

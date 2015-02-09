@@ -55,7 +55,7 @@ sleep $WAIT
 # --compressed Test compression handled correctly
 # --fail       Fail on server errors (4xx, 5xx)
 # --location   Follow redirects
-CURL_OPTIONS="-q --compressed --fail --location --max-time 30"
+CURL_OPTIONS="-q --compressed --fail --location --max-time 60"
 
 while read PATHNAME EXPECTED; do
   # Ignore empty lines and lines starting with #
