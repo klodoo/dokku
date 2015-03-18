@@ -31,7 +31,7 @@ fi
 ! has_tty && DOKKU_QUIET_OUTPUT=1
 
 if [[ $(id -un) != "akretion" && $(id -un) != "api" && $1 != plugins-install* && $1 != "plugins-update" ]]; then # AKRETION
-  sudo -u akretion -H $0 "$@"
+  sudo -u akretion -E -H $0 "$@"
   exit
 fi
 
