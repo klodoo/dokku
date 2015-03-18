@@ -18,9 +18,16 @@ source "$PLUGIN_PATH/common/functions"
 [[ $DOKKU_TRACE ]] && set -x
 
 parse_args "$@"
-for arg in "$@"; do
-  [[ "$arg" =~ ^-.* ]] && shift 1
-done
+args=("$@")
+if [[ "${args[0]}" =~ ^--.* ]]; then
+  for arg in "$@"; do
+    if [[ "$arg" =~ ^--.* ]];then
+      shift 1
+    else
+      break
+    fi
+  done
+fi
 ! has_tty && DOKKU_QUIET_OUTPUT=1
 
 if [[ $(id -un) != "akretion" && $(id -un) != "api" && $1 != plugins-install* && $1 != "plugins-update" ]]; then # AKRETION
@@ -79,7 +86,6 @@ case "$1" in
       port=$(docker port $id 5000 | sed 's/[0-9.]*://')
       ipaddr=127.0.0.1
     fi
-    echo $ipaddr > "$DOKKU_ROOT/$APP/IP"
 
     # if we can't post-deploy successfully, kill new container
     kill_new() {
@@ -92,16 +98,17 @@ case "$1" in
     # run checks first, then post-deploy hooks, which switches Nginx traffic
     trap kill_new INT TERM EXIT
     dokku_log_info1 "Running pre-flight checks"
-    pluginhook check-deploy $id $APP $port ${ipaddr:-localhost}
+    pluginhook check-deploy  $APP $port $ipaddr $id
+    trap -        INT TERM EXIT
 
     # now using the new container
     echo $id > "$DOKKU_ROOT/$APP/CONTAINER"
+    echo $ipaddr > "$DOKKU_ROOT/$APP/IP"
     echo $port > "$DOKKU_ROOT/$APP/PORT"
     echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
 
     dokku_log_info1 "Running post-deploy"
     pluginhook post-deploy  $APP $port $ipaddr
-    trap -        INT TERM EXIT
     docker logs $id # AKRETION
 
     # kill the old container
@@ -124,9 +131,11 @@ case "$1" in
 
   cleanup)
     # delete all non-running container
-    docker ps -a | grep 'Exit' | awk '{print $1}' | xargs docker rm &> /dev/null &
+    # shellcheck disable=SC2046
+    docker rm $(docker ps -a -f 'status=exited' -q) &> /dev/null &
     # delete unused images
-    docker images | grep '<none>' | awk '{print $3}' | xargs docker rmi &> /dev/null &
+    # shellcheck disable=SC2046
+    docker rmi $(docker images -f 'dangling=true' -q) &> /dev/null &
     ;;
 
   plugins)
@@ -152,7 +161,7 @@ case "$1" in
     ;;
 
   help|'')
-    echo "Usage: dokku [-q|--quiet|-t|--trace|--rm-container|--rm] COMMAND <app> [command-specific-options]"
+    echo "Usage: dokku [--quiet|--trace|--rm-container|--rm|--force] COMMAND <app> [command-specific-options]"
     echo ""
     echo "Options:"
 
