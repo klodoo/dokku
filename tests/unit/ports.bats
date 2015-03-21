@@ -108,3 +108,21 @@ teardown() {
   echo "status: "$status
   assert_success
 }
+
+@test "dockerfile port exposure" {
+  deploy_app dockerfile
+  run bash -c "grep upstream $DOKKU_ROOT/$TEST_APP/nginx.conf | grep 3000"
+  echo "output: "$output
+  echo "status: "$status
+  assert_success
+}
+
+@test "port exposure (xip.io style hostnames)" {
+  echo "127.0.0.1.xip.io" > "$DOKKU_ROOT/VHOST"
+  deploy_app
+
+  run bash -c "response=\"$(curl -s -S my-cool-guy-test-app.127.0.0.1.xip.io)\"; echo \$response; test \"\$response\" == \"nodejs/express\""
+  echo "output: "$output
+  echo "status: "$status
+  assert_success
+}

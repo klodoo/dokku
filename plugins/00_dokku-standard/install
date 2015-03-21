@@ -16,7 +16,7 @@ case "$DOKKU_DISTRO" in
     cat<<EOF > /etc/init/dokku-redeploy.conf
 description "Dokku app redeploy service"
 
-start on (started runsvdir)
+start on filesystem and started docker
 stop on (stopped runsvdir)
 
 script
