@@ -46,7 +46,7 @@ if [[ ! -z $DOKKU_HOST ]]; then
     appname=""
     if [[ -d .git ]] || git rev-parse --git-dir > /dev/null 2>&1; then
       set +e
-      appname=$(git remote -v 2>/dev/null | grep -Ei "^dokku" | head -n 1 | cut -f1 -d' ' | cut -f2 -d':' 2>/dev/null)
+      appname=$(git remote -v 2>/dev/null | grep -Ei "dokku@$DOKKU_HOST" | head -n 1 | cut -f1 -d' ' | cut -f2 -d':' 2>/dev/null)
       set -e
     else
       echo "This is not a git repository"
@@ -94,7 +94,7 @@ if [[ ! -z $DOKKU_HOST ]]; then
     fi
 
     if [[ -z "$donotshift" ]]; then
-      ssh "dokku@$DOKKU_HOST" "$@"
+      ssh -t "dokku@$DOKKU_HOST" "$@"
       exit $?
     fi
 
@@ -116,7 +116,7 @@ if [[ ! -z $DOKKU_HOST ]]; then
       fi
     fi
     # shellcheck disable=SC2086
-    ssh "dokku@$DOKKU_HOST" $long_args "$verb" "$appname" "${args[@]}"
+    ssh -t "dokku@$DOKKU_HOST" $long_args "$verb" "$appname" "${args[@]}"
   }
 
   if [[ "$0" == "dokku" ]] || [[ "$0" == *dokku_client.sh ]]; then
