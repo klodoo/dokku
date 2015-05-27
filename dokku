@@ -48,7 +48,7 @@ fi
 
 case "$1" in
   receive)
-    APP="$2"; IMAGE="dokku/$APP"; IMAGE_SOURCE_TYPE="$3"; TMP_WORK_DIR="$4"
+    APP="$2"; IMAGE="clodoo/$APP"; IMAGE_SOURCE_TYPE="$3"; TMP_WORK_DIR="$4"
     dokku_log_info1 "Cleaning up..."
     dokku cleanup
     dokku_log_info1 "Building $APP from $IMAGE_SOURCE_TYPE..."
@@ -63,7 +63,7 @@ case "$1" in
     ;;
 
   deploy)
-    APP="$2"; IMAGE="dokku/$APP"
+    APP="$2"; IMAGE="clodoo/$APP"
     pluginhook pre-deploy $APP
 
     if [[ -f "$DOKKU_ROOT/$APP/CONTAINER" ]]; then
