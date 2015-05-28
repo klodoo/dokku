@@ -91,7 +91,6 @@ case "$1" in
 
     # if we can't post-deploy successfully, kill new container
     kill_new() {
-      docker logs $id # AKRETION
       docker inspect $id &> /dev/null && docker stop $id > /dev/null && docker kill $id > /dev/null
       trap - INT TERM EXIT
       kill -9 $$
