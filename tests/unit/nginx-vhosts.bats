@@ -9,7 +9,7 @@ setup() {
 }
 
 teardown() {
-  destroy_app
+  destroy_app 0 $TEST_APP
   [[ -f "$DOKKU_ROOT/VHOST.bak" ]] && mv "$DOKKU_ROOT/VHOST.bak" "$DOKKU_ROOT/VHOST"
   [[ -f "$DOKKU_ROOT/HOSTNAME.bak" ]] && mv "$DOKKU_ROOT/HOSTNAME.bak" "$DOKKU_ROOT/HOSTNAME"
   disable_tls_wildcard
@@ -53,12 +53,30 @@ assert_http_success() {
   assert_output "200"
 }
 
+assert_access_log() {
+  local prefix=$1
+  run [ -a /var/log/nginx/$prefix-access.log ]
+  assert_success
+}
+
+assert_error_log() {
+  local prefix=$1
+  run [ -a /var/log/nginx/$prefix-error.log ]
+  assert_success
+}
+
 @test "(nginx-vhosts) nginx (no server tokens)" {
   deploy_app
   run /bin/bash -c "curl -s -D - $(dokku url $TEST_APP) -o /dev/null | egrep '^Server' | egrep '[0-9]+'"
   echo "output: "$output
   echo "status: "$status
   assert_failure
+}
+
+@test "(nginx-vhosts) logging" {
+    deploy_app
+    assert_access_log ${TEST_APP}
+    assert_error_log ${TEST_APP}
 }
 
 @test "(nginx-vhosts) nginx:build-config (wildcard SSL)" {
@@ -80,6 +98,15 @@ assert_http_success() {
   deploy_app
   assert_ssl_domain "wildcard1.dokku.me"
   assert_ssl_domain "wildcard2.dokku.me"
+}
+
+@test "(nginx-vhosts) nginx:build-config (wildcard SSL & unrelated domain)" {
+  destroy_app
+  TEST_APP="${TEST_APP}.example.com"
+  setup_test_tls_wildcard
+  deploy_app nodejs-express dokku@dokku.me:$TEST_APP
+  run /bin/bash -c "egrep '*.dokku.me' $DOKKU_ROOT/${TEST_APP}/nginx.conf | wc -l"
+  assert_output "0"
 }
 
 @test "(nginx-vhosts) nginx:build-config (with SSL CN mismatch)" {
