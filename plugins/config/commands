@@ -112,8 +112,11 @@ case "$1" in
 
   config:set-norestart)
     [[ -z $2 ]] && echo "Please specify an app to run the command on" && exit 1
-    verify_app_name "$2"
     APP="$2"
+    if [[ ! -d "$DOKKU_ROOT/$2" ]]; then
+      echo "App $APP does not exist, creating it"
+      mkdir "$DOKKU_ROOT/$APP" # AKRETION
+    fi
 
     if [[ -z "${*:3}" ]]; then
       echo "Usage: dokku config:set APP KEY1=VALUE1 [KEY2=VALUE2 ...]"
