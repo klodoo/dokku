@@ -39,8 +39,8 @@ packer:
 
 copyfiles:
 	find . -type f -exec sed -i 's/home\/dokku/home\/akretion/g' {} \;
-	find . -type f -exec sed -i 's/dokku\/$APP/clodoo\/$APP/g' {} \;
-	find . -type f -exec sed -i 's/dokku\/$TEST_APP/clodoo\/$TEST_APP/g' {} \;
+	find . -type f -exec sed -i 's/dokku\/$$APP/clodoo\/$$APP/g' {} \;
+	find . -type f -exec sed -i 's/dokku\/$$TEST_APP/clodoo\/$$TEST_APP/g' {} \;
 	find . -type f -exec sed -i 's/acl-add dokku/acl-add akretion/g' {} \;
 	find . -type f -exec sed -i 's/acl-remove dokku/acl-remove akretion/g' {} \;
 	find . -type f -exec sed -i 's/dokku@/akretion@/g' {} \;
