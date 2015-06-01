@@ -3,7 +3,7 @@ set -eo pipefail
 shopt -s nullglob
 
 export DOKKU_DISTRO=${DOKKU_DISTRO:="ubuntu"}
-export DOKKU_IMAGE=${DOKKU_IMAGE:="progrium/buildstep"}
+export DOKKU_IMAGE=${DOKKU_IMAGE:="akretion/odoocker"}
 export DOKKU_ROOT=${DOKKU_ROOT:=~akretion}
 
 export PLUGIN_PATH=${PLUGIN_PATH:="/var/lib/dokku/plugins"}
