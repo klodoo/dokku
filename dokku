@@ -10,6 +10,9 @@ export PLUGIN_PATH=${PLUGIN_PATH:="/var/lib/dokku/plugins"}
 export DOKKU_NOT_IMPLEMENTED_EXIT=10
 export DOKKU_VALID_EXIT=0
 
+export DOKKU_LOGS_DIR=${DOKKU_LOGS_DIR:="/var/log/dokku"}
+export DOKKU_EVENTS_LOGFILE=${DOKKU_EVENTS_LOGFILE:="$DOKKU_LOGS_DIR/events.log"}
+
 source "$PLUGIN_PATH/common/functions"
 
 [[ -f $DOKKU_ROOT/dokkurc ]] && source $DOKKU_ROOT/dokkurc
@@ -89,7 +92,11 @@ case "$1" in
         BIND_EXTERNAL=$(pluginhook bind-external-ip $APP)
 
         [[ -n "$DOKKU_BUILDSTEP" ]] && START_CMD="/start $PROC_TYPE"
-        [[ -z "$DOKKU_BUILDSTEP" ]] && DOKKU_DOCKERFILE_PORT=$(dokku config:get $APP DOKKU_DOCKERFILE_PORT || true)
+
+        if [[ -z "$DOKKU_BUILDSTEP" ]];then
+          DOKKU_DOCKERFILE_PORT=$(dokku config:get $APP DOKKU_DOCKERFILE_PORT || true)
+          START_CMD=$(dokku config:get $APP DOKKU_DOCKERFILE_START_CMD || $START_CMD)
+        fi
 
         if [[ "$BIND_EXTERNAL" = "false" ]] && [[ "$PROC_TYPE" == "web" ]];then
           port=${DOKKU_DOCKERFILE_PORT:=5000}
@@ -168,7 +175,7 @@ case "$1" in
   cleanup)
     # delete all non-running container
     # shellcheck disable=SC2046
-    docker rm $(docker ps -a -f 'status=exited' -q) &> /dev/null &
+    docker rm $(docker ps -a -f 'status=exited' -q) &> /dev/null || true
     # delete unused images
     # shellcheck disable=SC2046
     docker rmi $(docker images -f 'dangling=true' -q) &> /dev/null &
@@ -202,10 +209,10 @@ case "$1" in
     echo "Options:"
 
     cat<<EOF | pluginhook commands help | sort
-    help                                            Print the list of commands
-    plugins                                         Print active plugins
-    plugins-install                                 Install active plugins
-    plugins-update                                  Update active plugins
+    help                                                       Print the list of commands
+    plugins                                                    Print active plugins
+    plugins-install                                            Install active plugins
+    plugins-update                                             Update active plugins
 EOF
     ;;
 
