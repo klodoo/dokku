@@ -34,7 +34,7 @@ fi
 ! has_tty && DOKKU_QUIET_OUTPUT=1
 
 if [[ $(id -un) != "dokku" && $1 != plugins-install* && $1 != "plugins-update" ]]; then
-  sudo -u dokku -E -H $0 "$@"
+  sudo -u dokku -H $0 "$@"
   exit
 fi
 
